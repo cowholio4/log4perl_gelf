@@ -1,0 +1,10 @@
+Changes
+lib/Log/Log4perl/Layout/GELF.pm
+Makefile.PL
+MANIFEST			This list of files
+README
+t/00-init.t
+t/01-log_to_graylog.t 
+t/manifest.t
+t/pod-coverage.t
+t/pod.t

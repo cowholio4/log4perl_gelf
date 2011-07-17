@@ -2,42 +2,104 @@
 package Log::Log4perl::Layout::GELF;
 ##################################################
 
+use 5.006;
 use strict;
 use warnings;
 
 use JSON::XS;
 use IO::Compress::Gzip qw( gzip $GzipError );
-use Data::Dumper::Simple;
 
 use base qw(Log::Log4perl::Layout::PatternLayout);
 
+=head1 NAME
+
+Log::Log4perl::Layout::GELF - Log4perl for graylog2
+
+=head1 VERSION
+
+Version 0.01
+
+=cut
+
+our $VERSION = '0.01';
+
+=head1 SYNOPSIS
+
+Log4perl implementation of GELF. When used with
+Log::Log4perl::Appender::Socket you can log directly
+to a graylog2 server.
+
+Code snippet. Replace the ip with your graylog server.
+
+    use Log::Log4perl
+    my $logger_conf = {
+      'log4perl.logger.graylog'           => "DEBUG, SERVER",
+      'log4perl.appender.SERVER'          => "Log::Log4perl::Appender::Socket",
+      'log4perl.appender.SERVER.PeerAddr' => '10.211.1.94',
+      'log4perl.appender.SERVER.PeerPort' => "12201",
+      'log4perl.appender.SERVER.Proto'    => "udp",
+      'log4perl.appender.SERVER.layout'   => "GELF"
+    };
+    Log::Log4perl->init( $logger_conf );
+    my $LOGGER = Log::Log4perl->get_logger('graylog');
+    $LOGGER->debug("Debug log");
+    ...
+=cut
+
+=head1 SUBROUTINES/METHODS
+
+=head2 new
+    
+    Can take most of options that Log::Log4perl::Layout::PatternLayout can.
+    
+    Additional Options:
+        PlainText - outputs plaintext and not gzipped files.
+    
+=cut
 sub new {
     my $class = shift;
     $class = ref ($class) || $class;
-
-    my $options       = ref $_[0] eq "HASH" ? shift : {};
+    
+    my $options = ref $_[0] eq "HASH" ? shift : {};
+    
+    # Creating object to make changes easier
     my $gelf_format = { 
         "version" => "1.0",
         "host" => "%H",
         "short_message" => "%m{chomp}",
-        "timestamp" => "%Z", # write my own spec
-        "level"=> "%Y", # write my own spec
+        "timestamp" => "%Z", # custom cspec
+        "level"=> "%Y", # custom cspec
         "facility"=> "%M",
         "file"=> "%F",
         "line"=> "%L",
         "_pid" => "%P", 
     };
+    # make a JSON string
     my $conversion_pattern = encode_json($gelf_format);
+    
     $options->{ConversionPattern} = { value => $conversion_pattern } ;
+    
+    # Since we are building on top of PatternLayout, we can define our own
+    # own patterns using a "cspec".
     $options->{cspec} = { 
         'Z' => { value => sub {return time } }, 
         'Y' => { value => \&_level_converter } ,
-    } ;
-    warn $conversion_pattern;
+    };
+    
     my $self = $class->SUPER::new($options);
     
+    # to help with debugging. you can skip the bzipping.
+    $self->{PlainText} = 0;
+    if(defined $options->{PlainText}{value} ){
+        $self->{PlainText} = 1;
+    }
     return $self;
 }
+
+
+# Maps over the syslog levels from Log4perl levels.
+
+# Syslog Levels for Reference
 # 0 Emergency: system is unusable 
 # 1 Alert: action must be taken immediately 
 # 2 Critical: critical conditions 
@@ -46,10 +108,9 @@ sub new {
 # 5 Notice: normal but significant condition 
 # 6 Informational: informational messages 
 # 7 Debug: debug-level messages
-
-
 sub _level_converter {
     my ($layout, $message, $category, $priority, $caller_level) = @_;
+    # TODO Replace with a case statement
     my $levels = {
         "DEBUG" => 7,
         "INFO"  => 6,
@@ -60,12 +121,20 @@ sub _level_converter {
     };
     return $levels->{$priority};
 }
+
+# Wraps the Log::Log4perl::Layout::PatternLayout return value so we can gzip it.
 sub render {
-  my($self, $message, $category, $priority, $caller_level) = @_;
-  my $encoded_message = $self->SUPER::render($message, $category, $priority, $caller_level);
-  my $gzipped_message;
-  warn $encoded_message;
-  gzip \$encoded_message =>  \$gzipped_message or die "gzip failed: $GzipError\n";
-  return  $gzipped_message;
+    my($self, $message, $category, $priority, $caller_level) = @_;
+    my $encoded_message = $self->SUPER::render($message, $category, $priority, $caller_level);
+    
+    # makes debugging easier
+    if( $self->{plain_text} ){
+        return $encoded_message;
+    }
+    
+    # Graylog2 servers require gzipped messesages.
+    my $gzipped_message;
+    gzip \$encoded_message =>  \$gzipped_message or die "gzip failed: $GzipError\n";
+    return  $gzipped_message;
 }
 1;
