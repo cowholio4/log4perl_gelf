@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More;
+use Test::More tests => 2;
 
 use lib '../lib/';
 BEGIN { use_ok( 'Log::Log4perl::Layout::GELF' ); }
@@ -9,7 +9,10 @@ BEGIN { use_ok( 'Log::Log4perl' ); }
 
 
 _init_logger();
+
 done_testing(2);
+
+
 
 sub _init_logger
 {
