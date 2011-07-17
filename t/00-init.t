@@ -10,3 +10,4 @@ my $layout = Log::Log4perl::Layout::GELF->new();
 isa_ok($layout, "Log::Log4perl::Layout::GELF");
 
 can_ok($layout, ("render"));
+done_testing(3);

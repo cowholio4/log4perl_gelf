@@ -13,6 +13,7 @@ isa_ok($layout, "Log::Log4perl::Layout::GELF");
 can_ok($layout, ("render"));
 
 _init_logger();
+done_testing(4);
 
 sub _init_logger
 {

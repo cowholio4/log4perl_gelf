@@ -8,8 +8,12 @@ use warnings;
 
 use JSON::XS;
 use IO::Compress::Gzip qw( gzip $GzipError );
+use Log::Log4perl;
 
 use base qw(Log::Log4perl::Layout::PatternLayout);
+
+# We need to define our own cspecs
+$Log::Log4perl::ALLOW_CODE_IN_CONFIG_FILE = 1;
 
 =head1 NAME
 
@@ -90,8 +94,8 @@ sub new {
     
     # to help with debugging. you can skip the bzipping.
     $self->{PlainText} = 0;
-    if(defined $options->{PlainText}{value} ){
-        $self->{PlainText} = 1;
+    if(defined $options->{PlainText}->{value} ){
+        $self->{PlainText} = $options->{PlainText}->{value};
     }
     return $self;
 }
@@ -128,7 +132,7 @@ sub render {
     my $encoded_message = $self->SUPER::render($message, $category, $priority, $caller_level);
     
     # makes debugging easier
-    if( $self->{plain_text} ){
+    if( defined $self->{PlainText} && $self->{PlainText} ){
         return $encoded_message;
     }
     
