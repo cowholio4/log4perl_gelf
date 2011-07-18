@@ -125,8 +125,12 @@ sub _level_converter {
     };
     return $levels->{$priority};
 }
-
-# Wraps the Log::Log4perl::Layout::PatternLayout return value so we can gzip it.
+=head2 render
+    
+    Wraps the Log::Log4perl::Layout::PatternLayout return value so we can
+    gzip the JSON string.
+    
+=cut
 sub render {
     my($self, $message, $category, $priority, $caller_level) = @_;
     my $encoded_message = $self->SUPER::render($message, $category, $priority, $caller_level);
