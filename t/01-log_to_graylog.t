@@ -1,9 +1,10 @@
+#!perl -T
+
 use strict;
 use warnings;
 
-use Test::More;
+use Test::More tests => 4;
 
-use lib '../lib/';
 BEGIN { use_ok( 'Log::Log4perl::Layout::GELF' ); }
 BEGIN { use_ok( 'Log::Log4perl' ); }
 
@@ -13,7 +14,7 @@ isa_ok($layout, "Log::Log4perl::Layout::GELF");
 can_ok($layout, ("render"));
 
 _init_logger();
-done_testing(4);
+
 
 sub _init_logger
 {
