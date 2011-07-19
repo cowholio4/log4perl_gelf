@@ -5,6 +5,7 @@ MANIFEST			This list of files
 README
 t/00-init.t
 t/01-log_to_graylog.t 
+t/02-log_to_screen.t 
 t/manifest.t
 t/pod-coverage.t
 t/pod.t
