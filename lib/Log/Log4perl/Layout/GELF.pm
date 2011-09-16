@@ -33,6 +33,21 @@ Log4perl implementation of GELF. When used with
 Log::Log4perl::Appender::Socket you can log directly
 to a graylog2 server.
 
+=cut
+
+=head1 What is graylog?
+
+Graylog is log management server that can be used to run analytics, 
+alerting, monitoring and perform powerful searches over your whole 
+log base. Need to debug a failing request? Just run a quick filter 
+search to find it and see what errors it produced. Want to see all 
+messages a certain API consumer is consuming in real time? Create 
+streams for every consumer and have them always only one click away.
+
+=cut
+
+=head1 Configuration Sample
+
 Code snippet. Replace the ip with your graylog server.
 
     use Log::Log4perl
