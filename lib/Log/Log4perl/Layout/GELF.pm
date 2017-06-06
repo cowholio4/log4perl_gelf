@@ -25,7 +25,7 @@ Version 0.03
 
 =cut
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 =head1 SYNOPSIS
 
@@ -52,12 +52,13 @@ Code snippet. Replace the ip with your graylog server.
 
     use Log::Log4perl
     my $logger_conf = {
-      'log4perl.logger.graylog'           => "DEBUG, SERVER",
-      'log4perl.appender.SERVER'          => "Log::Log4perl::Appender::Socket",
-      'log4perl.appender.SERVER.PeerAddr' => '10.211.1.94',
-      'log4perl.appender.SERVER.PeerPort' => "12201",
-      'log4perl.appender.SERVER.Proto'    => "udp",
-      'log4perl.appender.SERVER.layout'   => "GELF"
+      'log4perl.logger.graylog'                  => "DEBUG, SERVER",
+      'log4perl.appender.SERVER'                 => "Log::Log4perl::Appender::Socket",
+      'log4perl.appender.SERVER.PeerAddr'        => '10.211.1.94',
+      'log4perl.appender.SERVER.PeerPort'        => "12201",
+      'log4perl.appender.SERVER.Proto'           => "udp",
+      'log4perl.appender.SERVER.layout'          => "GELF"
+      'log4perl.appender.SERVER.layout.facility' => "Custom facility"
     };
     Log::Log4perl->init( $logger_conf );
     my $LOGGER = Log::Log4perl->get_logger('graylog');
@@ -93,6 +94,12 @@ sub new {
         "line"=> "%L",
         "_pid" => "%P", 
     };
+
+    # if facility is set in layout, overwrite default "%M"
+    if (defined $options->{facility}->{value}) {
+        $gelf_format->{"facility"} = $options->{facility}->{value};
+    }
+
     # make a JSON string
     my $conversion_pattern = encode_json($gelf_format);
     

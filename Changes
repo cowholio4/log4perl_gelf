@@ -1,5 +1,8 @@
 Revision history for Log-Log4perl-Layout-GELF
 
+0.04    2012-03-12 23:12
+    Added custom GELF facility via log4perl config, just set
+    log4perl.appender.LOGGER.layout.facility = Foo
 0.02    2011-07-19 12:00
 	Fixed dependencies and test files
 0.01    2011-07-19 08:00
